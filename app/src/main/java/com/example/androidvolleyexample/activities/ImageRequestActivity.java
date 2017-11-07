@@ -1,5 +1,6 @@
 package com.example.androidvolleyexample.activities;
 
+import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.Cache;
 import com.android.volley.NetworkError;
 import com.android.volley.NoConnectionError;
 import com.android.volley.ParseError;
@@ -20,9 +22,14 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.NetworkImageView;
 import com.example.androidvolleyexample.R;
 import com.example.androidvolleyexample.singletonclasses.VolleySingleton;
 import com.example.androidvolleyexample.utils.LruBitmapCache;
+import com.android.volley.Cache;
+import com.android.volley.Cache.Entry;
+
+import java.io.UnsupportedEncodingException;
 
 public class ImageRequestActivity extends AppCompatActivity {
 
@@ -32,11 +39,15 @@ public class ImageRequestActivity extends AppCompatActivity {
     private RequestQueue requestQueue;
 
     private ImageLoader mImageLoader;
-
+    String image_url = "http://photy.me/api/v1/image/224e0947440ce00f639798c332fd6c271480424092032.jpeg";
+    private NetworkImageView imgNetWorkView;
+    private ImageView imageView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_request);
+        imgNetWorkView = (NetworkImageView) findViewById(R.id.imgNetwork);
+        imageView = (ImageView) findViewById(R.id.imgView);
         context=this;
 
         requestQueue= VolleySingleton.getVolleySingletonInstance().getRequestQueue();
@@ -46,6 +57,45 @@ public class ImageRequestActivity extends AppCompatActivity {
 
         mImageLoader = new ImageLoader(this.requestQueue,
                 new LruBitmapCache());
+
+        // If you are using NetworkImageView
+        imgNetWorkView.setImageUrl(image_url, mImageLoader);
+
+
+        // If you are using normal ImageView
+		/*imageLoader.get(Const.URL_IMAGE, new ImageListener() {
+
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				Log.e(TAG, "Image Load Error: " + error.getMessage());
+			}
+
+			@Override
+			public void onResponse(ImageContainer response, boolean arg1) {
+				if (response.getBitmap() != null) {
+					// load image into imageview
+					imageView.setImageBitmap(response.getBitmap());
+				}
+			}
+		});*/
+
+        // Loading image with placeholder and error image
+        mImageLoader.get(image_url, ImageLoader.getImageListener(
+                imageView, R.drawable.ico_loading, R.drawable.ico_error));
+
+        Cache cache = requestQueue.getCache();
+        Entry entry = cache.get(image_url);
+        if(entry != null){
+            try {
+                String data = new String(entry.data, "UTF-8");
+                // handle data, like converting it to xml, json, bitmap etc.,
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }else{
+            // cached response doesn't exists. Make a network call here
+        }
+
 
         //ImageRequest imageRequest =getImageRequest();
         //requestQueue.add(imageRequest);
@@ -62,7 +112,7 @@ public class ImageRequestActivity extends AppCompatActivity {
 
     private ImageRequest getImageRequest()
     {
-        String image_url = "http://photy.me/api/v1/image/224e0947440ce00f639798c332fd6c271480424092032.jpeg";
+
         final ProgressDialog pDialog = new ProgressDialog(this);
         pDialog.setMessage("Loading...");
         pDialog.show();

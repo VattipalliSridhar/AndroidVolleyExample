@@ -13,4 +13,22 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>
 
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/imgNetwork"
+        android:layout_width="fill_parent"
+        android:layout_height="150dp"
+        android:layout_margin="10dp"
+        android:layout_marginTop="50dp"
+        android:scaleType="fitXY" >
+    </com.android.volley.toolbox.NetworkImageView>
+
+    <ImageView
+        android:id="@+id/imgView"
+        android:layout_width="fill_parent"
+        android:layout_height="150dp"
+        android:layout_margin="10dp"
+        android:layout_marginTop="50dp"
+        android:scaleType="fitCenter" >
+    </ImageView>
+
 </RelativeLayout>
